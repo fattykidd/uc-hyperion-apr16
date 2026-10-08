@@ -1,0 +1,28 @@
+{
+  "driver_id": "uc-hyperion-apr16",
+  "name": "AudioControl Hyperion APR-16",
+  "version": "1.0.0",
+  "developer": {
+    "name": "Fattykidd"
+  },
+  "description": "Integration driver for the AudioControl Hyperion APR-16 16-channel AV Processor.",
+  "icon": "receiver",
+  "port": 9090,
+  "setup_data_schema": {
+    "title": "Hyperion APR-16 Setup",
+    "type": "object",
+    "properties": {
+      "host": {
+        "title": "IP Address or Hostname",
+        "type": "string",
+        "format": "ipv4"
+      },
+      "port": {
+        "title": "API Port",
+        "type": "integer",
+        "default": 80
+      }
+    },
+    "required": ["host"]
+  }
+}
