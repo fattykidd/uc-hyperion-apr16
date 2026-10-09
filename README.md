@@ -1,4 +1,4 @@
-# AudioControl Hyperion APR-16 Unfolded Circle Remote Driver
+# AudioControl Hyperion APR-16 Unfolded Circle Remote Driver (Pre-Release)
 
 [![GitHub Release](https://img.shields.io/github/v/release/Fattykidd/uc-hyperion-apr16?style=flat-square&color=blue)](https://github.com/Fattykidd/uc-hyperion-apr16/releases)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg?style=flat-square)](LICENSE)
