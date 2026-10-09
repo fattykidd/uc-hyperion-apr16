@@ -1,8 +1,6 @@
 # AudioControl Hyperion APR-16 Unfolded Circle Remote Driver
 
 [![GitHub Release](https://img.shields.io/github/v/release/Fattykidd/uc-hyperion-apr16?style=flat-square&color=blue)](https://github.com/Fattykidd/uc-hyperion-apr16/releases)
-[![Build and Publish Docker Container](https://github.com/Fattykidd/uc-hyperion-apr16/actions/workflows/build-and-publish.yml/badge.svg)](https://github.com/Fattykidd/uc-hyperion-apr16/actions/workflows/build-and-publish.yml)
-[![Docker Image Version](https://img.shields.io/docker/v/ghcr.io/fattykidd/uc-hyperion-apr16?sort=semver&style=flat-square&label=ghcr.io)](https://github.com/Fattykidd/uc-hyperion-apr16/pkgs/container/uc-hyperion-apr16)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg?style=flat-square)](LICENSE)
 
 An integration driver for the **Unfolded Circle Remote 3** and **Remote Two**, written in Python using the official `ucapi-framework`. This driver provides full local network control, real-time diagnostic polling, and system management for the **AudioControl Hyperion APR-16** 16-channel AV Processor.
