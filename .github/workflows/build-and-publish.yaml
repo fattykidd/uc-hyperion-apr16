@@ -1,11 +1,11 @@
-name: Build and Publish Docker Container
+name: Build and Publish Integration Driver
 
 on:
   push:
     branches:
       - main
     tags:
-      - 'v*.*.*'
+      - "v*"
   workflow_dispatch:
 
 env:
@@ -13,7 +13,9 @@ env:
   IMAGE_NAME: ${{ github.repository }}
 
 jobs:
-  build-and-push:
+  # --- Job 1: Build & Push Multi-Arch Docker Container ---
+  build-docker:
+    name: Build & Publish Docker Image
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -25,7 +27,6 @@ jobs:
 
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v3
-        # Needed for cross-platform ARM64 builds
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
@@ -57,3 +58,59 @@ jobs:
           labels: ${{ steps.meta.outputs.labels }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
+
+  # --- Job 2: Build Native .tar.gz Package for Direct Remote Installation ---
+  build-tarball:
+    name: Build Release for Direct Remote Installation
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Extract release version or commit hash
+        id: vars
+        run: |
+          if [[ "${{ github.ref }}" == refs/tags/* ]]; then
+            VERSION="${GITHUB_REF#refs/tags/}"
+          else
+            VERSION="main-${GITHUB_SHA::7}"
+          fi
+          echo "VERSION=${VERSION}" >> $GITHUB_OUTPUT
+
+      - name: Assemble Native Integration Package
+        run: |
+          # Create a clean packaging staging directory
+          mkdir -p build_pkg
+
+          # Copy driver files, metadata manifest, and entrypoints
+          cp -r driver driver.json requirements.txt README.md build_pkg/
+
+          # Bundle dependencies into the package root so the Remote can run offline
+          pip install --target=build_pkg -r requirements.txt
+
+          # Create the final .tar.gz archive
+          cd build_pkg
+          tar -czvf ../uc-hyperion-apr16-${{ steps.vars.outputs.VERSION }}.tar.gz .
+          cd ..
+
+      - name: Upload Tarball Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: uc-hyperion-apr16-${{ steps.vars.outputs.VERSION }}.tar.gz
+          path: uc-hyperion-apr16-${{ steps.vars.outputs.VERSION }}.tar.gz
+
+      - name: Attach Tarball to GitHub Release
+        if: startsWith(github.ref, 'refs/tags/')
+        uses: softprops/action-gh-release@v2
+        with:
+          files: uc-hyperion-apr16-${{ steps.vars.outputs.VERSION }}.tar.gz
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
