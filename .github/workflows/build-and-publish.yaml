@@ -5,6 +5,7 @@ on:
     branches:
       - main
     tags:
+      - "v*.*.*"
       - "v*"
   workflow_dispatch:
 
@@ -75,42 +76,45 @@ jobs:
         with:
           python-version: '3.11'
 
-      - name: Extract release version or commit hash
+      - name: Extract release version
         id: vars
         run: |
           if [[ "${{ github.ref }}" == refs/tags/* ]]; then
             VERSION="${GITHUB_REF#refs/tags/}"
           else
-            VERSION="main-${GITHUB_SHA::7}"
+            VERSION="v1.0.0-${GITHUB_SHA::7}"
           fi
           echo "VERSION=${VERSION}" >> $GITHUB_OUTPUT
+          echo "PACKAGE_NAME=uc-hyperion-apr16-${VERSION}.tar.gz" >> $GITHUB_OUTPUT
 
       - name: Assemble Native Integration Package
         run: |
-          # Create a clean packaging staging directory
           mkdir -p build_pkg
 
-          # Copy driver files, metadata manifest, and entrypoints
+          # Copy core driver source files & metadata manifests
           cp -r driver driver.json requirements.txt README.md build_pkg/
 
-          # Bundle dependencies into the package root so the Remote can run offline
-          pip install --target=build_pkg -r requirements.txt
+          # Install pure-python requirements directly into package root
+          pip install --target=build_pkg -r requirements.txt --no-compile
 
-          # Create the final .tar.gz archive
+          # Create final tarball package
           cd build_pkg
-          tar -czvf ../uc-hyperion-apr16-${{ steps.vars.outputs.VERSION }}.tar.gz .
+          tar -czvf "../${{ steps.vars.outputs.PACKAGE_NAME }}" .
           cd ..
 
-      - name: Upload Tarball Artifact
+      - name: Upload Build Artifact to Workflow
         uses: actions/upload-artifact@v4
         with:
-          name: uc-hyperion-apr16-${{ steps.vars.outputs.VERSION }}.tar.gz
-          path: uc-hyperion-apr16-${{ steps.vars.outputs.VERSION }}.tar.gz
+          name: ${{ steps.vars.outputs.PACKAGE_NAME }}
+          path: ${{ steps.vars.outputs.PACKAGE_NAME }}
 
-      - name: Attach Tarball to GitHub Release
+      - name: Publish Tarball to GitHub Release Assets
         if: startsWith(github.ref, 'refs/tags/')
         uses: softprops/action-gh-release@v2
         with:
-          files: uc-hyperion-apr16-${{ steps.vars.outputs.VERSION }}.tar.gz
+          files: ${{ steps.vars.outputs.PACKAGE_NAME }}
+          draft: false
+          prerelease: false
+          generate_release_notes: true
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
