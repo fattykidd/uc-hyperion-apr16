@@ -126,8 +126,15 @@ class APR16Driver(BaseIntegrationDriver):
 
 
 if __name__ == "__main__":
-    logging.basicConfig(level=logging.INFO)
+    logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s] %(name)s: %(message)s")
+    
+    # Instantiate the driver
     driver_wrapper = APR16Driver()
     
-    # If your base driver or framework provides a run method, call it directly:
-    asyncio.run(driver_wrapper.run())
+    _LOGGER.info("Starting AudioControl Hyperion APR-16 integration driver...")
+    
+    # Run the asyncio event loop indefinitely to keep the driver active
+    try:
+        asyncio.get_event_loop().run_forever()
+    except KeyboardInterrupt:
+        _LOGGER.info("Driver stopped by user")
