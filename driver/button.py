@@ -1,6 +1,6 @@
 """Action buttons for APR-16 system maintenance and recovery."""
 
-from ucapi.entities import ButtonEntity
+from ucapi_framework import ButtonEntity
 from ucapi.const import EntityCategory
 from .client import APR16Client
 
