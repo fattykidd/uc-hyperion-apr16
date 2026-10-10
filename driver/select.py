@@ -1,7 +1,6 @@
 """Select entities for APR-16 audio processing modes and trigger parameters."""
 
 from ucapi_framework import SelectEntity
-from ucapi import EntityCategory
 from .client import APR16Client
 from .media_player import SOUND_MODES
 

@@ -1,7 +1,6 @@
 """Diagnostic and stream status sensors for APR-16."""
 
 from ucapi_framework import SensorEntity
-from ucapi import EntityCategory
 from .client import APR16Client
 
 
