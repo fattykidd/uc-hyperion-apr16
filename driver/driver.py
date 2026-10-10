@@ -5,7 +5,7 @@ import logging
 import os
 from pathlib import Path
 
-from ucapi_framework import BaseIntegrationDriver, MDNSDiscovery
+from ucapi_framework import BaseIntegrationDriver
 from ucapi import StatusCodes
 
 from .client import APR16Client
@@ -124,28 +124,13 @@ class APR16Driver(BaseIntegrationDriver):
             await asyncio.sleep(4)
 
 
-async def main():
-    """Initialize driver and start mDNS advertisement."""
-    driver_wrapper = APR16Driver()
-    
-    # Path to driver.json inside the container
-    driver_json_path = Path(__file__).parent.parent / "driver.json"
-    if not driver_json_path.exists():
-        driver_json_path = Path("/app/driver.json")
-
-    # Start mDNS publisher if enabled
-    disable_mdns = os.getenv("UC_DISABLE_MDNS_PUBLISH", "false").lower() == "true"
-    if not disable_mdns and driver_json_path.exists():
-        _LOGGER.info("Starting mDNS discovery publisher for port 9090...")
-        mdns = MDNSDiscovery(driver_json_path=str(driver_json_path), port=9090)
-        await mdns.start()
-
-    _LOGGER.info("Starting AudioControl Hyperion APR-16 integration driver loop...")
-    
-    # Run loop
-    await asyncio.Event().wait()
-
-
 if __name__ == "__main__":
     logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s] %(name)s: %(message)s")
-    asyncio.run(main())
+    
+    _LOGGER.info("Starting AudioControl Hyperion APR-16 integration driver...")
+    driver_wrapper = APR16Driver()
+    
+    try:
+        asyncio.get_event_loop().run_forever()
+    except KeyboardInterrupt:
+        _LOGGER.info("Driver stopped by user")
