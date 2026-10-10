@@ -2,7 +2,10 @@
 
 import asyncio
 import logging
-from ucapi_framework import BaseIntegrationDriver
+import os
+from pathlib import Path
+
+from ucapi_framework import BaseIntegrationDriver, MDNSDiscovery
 from ucapi import StatusCodes
 
 from .client import APR16Client
@@ -81,11 +84,7 @@ class APR16Driver(BaseIntegrationDriver):
             self.client = None
             return StatusCodes.SETUP_ERROR
 
-        # Add the configured device to the framework. 
-        # The framework automatically instantiates and registers all entity_classes 
-        # passed to super().__init__() for this device instance.
         self.add_configured_device(setup_data, connect=True)
-
         return StatusCodes.OK
 
     async def on_connect(self) -> None:
@@ -125,16 +124,28 @@ class APR16Driver(BaseIntegrationDriver):
             await asyncio.sleep(4)
 
 
-if __name__ == "__main__":
-    logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s] %(name)s: %(message)s")
-    
-    # Instantiate the driver
+async def main():
+    """Initialize driver and start mDNS advertisement."""
     driver_wrapper = APR16Driver()
     
-    _LOGGER.info("Starting AudioControl Hyperion APR-16 integration driver...")
+    # Path to driver.json inside the container
+    driver_json_path = Path(__file__).parent.parent / "driver.json"
+    if not driver_json_path.exists():
+        driver_json_path = Path("/app/driver.json")
+
+    # Start mDNS publisher if enabled
+    disable_mdns = os.getenv("UC_DISABLE_MDNS_PUBLISH", "false").lower() == "true"
+    if not disable_mdns and driver_json_path.exists():
+        _LOGGER.info("Starting mDNS discovery publisher for port 9090...")
+        mdns = MDNSDiscovery(driver_json_path=str(driver_json_path), port=9090)
+        await mdns.start()
+
+    _LOGGER.info("Starting AudioControl Hyperion APR-16 integration driver loop...")
     
-    # Run the asyncio event loop indefinitely to keep the driver active
-    try:
-        asyncio.get_event_loop().run_forever()
-    except KeyboardInterrupt:
-        _LOGGER.info("Driver stopped by user")
+    # Run loop
+    await asyncio.Event().wait()
+
+
+if __name__ == "__main__":
+    logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s] %(name)s: %(message)s")
+    asyncio.run(main())
