@@ -128,4 +128,6 @@ class APR16Driver(BaseIntegrationDriver):
 if __name__ == "__main__":
     logging.basicConfig(level=logging.INFO)
     driver_wrapper = APR16Driver()
-    asyncio.run(driver_wrapper.api.run())
+    
+    # If your base driver or framework provides a run method, call it directly:
+    asyncio.run(driver_wrapper.run())
