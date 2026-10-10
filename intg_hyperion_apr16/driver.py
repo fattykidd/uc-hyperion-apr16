@@ -132,9 +132,9 @@ async def main():
     
     driver_wrapper = APR16Driver()
     
-    # ucapi-framework handles the underlying server loop when awaited or run via its async hooks
-    # Keep the driver running indefinitely
-    await asyncio.Event().wait()
+    # The ucapi-framework BaseIntegrationDriver usually provides an async run/start hook 
+    # or parses args to start the server loop.
+    await driver_wrapper.run()
 
 
 if __name__ == "__main__":
