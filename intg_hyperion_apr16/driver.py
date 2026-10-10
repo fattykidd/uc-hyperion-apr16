@@ -4,6 +4,7 @@ import asyncio
 import logging
 import os
 from pathlib import Path
+from py_compile import main
 
 from ucapi_framework import BaseIntegrationDriver
 from ucapi import StatusCodes
@@ -124,13 +125,20 @@ class APR16Driver(BaseIntegrationDriver):
             await asyncio.sleep(4)
 
 
-if __name__ == "__main__":
+async def main():
+    """Run the integration driver."""
     logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s] %(name)s: %(message)s")
-    
     _LOGGER.info("Starting AudioControl Hyperion APR-16 integration driver...")
+    
     driver_wrapper = APR16Driver()
     
+    # ucapi-framework handles the underlying server loop when awaited or run via its async hooks
+    # Keep the driver running indefinitely
+    await asyncio.Event().wait()
+
+
+if __name__ == "__main__":
     try:
-        asyncio.get_event_loop().run_forever()
+        asyncio.run(main())
     except KeyboardInterrupt:
         _LOGGER.info("Driver stopped by user")
