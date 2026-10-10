@@ -7,7 +7,6 @@ from ucapi_framework import (
     BaseIntegrationDriver,
     MediaPlayerEntity,
     SelectEntity,
-    NumberEntity,
     SwitchEntity,
     SensorEntity,
     ButtonEntity,
