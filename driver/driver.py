@@ -3,8 +3,8 @@
 import asyncio
 import logging
 import sys
-from ucapi_framework.driver import UCIntegrationDriver
 from ucapi_framework import (
+    BaseIntegrationDriver,
     MediaPlayerEntity,
     SelectEntity,
     NumberEntity,
@@ -33,7 +33,7 @@ from .button import SystemRebootButtonEntity, HdmiHandshakeResetButtonEntity
 _LOGGER = logging.getLogger(__name__)
 
 
-class APR16Driver(UCIntegrationDriver):
+class APR16Driver(BaseIntegrationDriver):
     """Unfolded Circle integration driver for AudioControl Hyperion APR-16."""
     def __init__(self):
         super().__init__()
