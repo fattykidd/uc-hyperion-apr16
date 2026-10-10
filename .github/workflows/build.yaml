@@ -92,7 +92,7 @@ jobs:
           mkdir -p build_pkg
 
           # Copy core driver source files & metadata manifests
-          cp -r driver driver.json requirements.txt README.md build_pkg/
+          cp -r intg_hyperion_apr16 driver.json requirements.txt README.md build_pkg/
 
           # Install pure-python requirements directly into package root
           pip install --target=build_pkg -r requirements.txt --no-compile
