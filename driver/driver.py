@@ -11,7 +11,7 @@ from ucapi_framework import (
     SensorEntity,
     ButtonEntity,
 )
-from ucapi.const import DriverState
+from ucapi import DeviceStates, StatusCodes
 
 from .client import APR16Client
 from .media_player import APR16MediaPlayerEntity
