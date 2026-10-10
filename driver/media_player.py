@@ -2,10 +2,7 @@
 
 import logging
 
-# Entity base class from ucapi-framework
-from ucapi_framework import MediaPlayerEntity, MediaPlayerAttributes
-
-# Commands, features, and states from ucapi.media_player or ucapi
+from ucapi_framework import MediaPlayerEntity
 from ucapi.media_player import (
     Commands as MediaPlayerCommand,
     Features as MediaPlayerFeature,
