@@ -3,7 +3,16 @@
 import asyncio
 import logging
 import sys
-from ucapi_framework import IntegrationDriver
+from ucapi import IntegrationDriver
+# Entities from ucapi_framework
+from ucapi_framework import (
+    MediaPlayerEntity,
+    SelectEntity,
+    NumberEntity,
+    SwitchEntity,
+    SensorEntity,
+    ButtonEntity,
+)
 from ucapi.const import DriverState
 
 from .client import APR16Client
