@@ -1,7 +1,7 @@
 """Switch entities for APR-16 global settings, triggers, and HPD control."""
 
 from ucapi_framework import SwitchEntity
-from ucapi.const import EntityCategory
+from ucapi import EntityCategory
 from .client import APR16Client
 
 
