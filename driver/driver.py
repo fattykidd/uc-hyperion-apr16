@@ -3,7 +3,7 @@
 import asyncio
 import logging
 import sys
-from ucapi_framework import Driver
+from ucapi_framework import IntegrationDriver
 from ucapi.const import DriverState
 
 from .client import APR16Client
@@ -25,18 +25,32 @@ from .button import SystemRebootButtonEntity, HdmiHandshakeResetButtonEntity
 _LOGGER = logging.getLogger(__name__)
 
 
-class APR16Driver:
+class APR16Driver (IntegrationDriver):
     """Unfolded Circle integration driver for AudioControl Hyperion APR-16."""
 
     def __init__(self):
-        self.driver = Driver("uc-hyperion-apr16")
+        super().__init__("uc-hyperion-apr16")
         self.client: APR16Client | None = None
         self._poll_task: asyncio.Task | None = None
+        self._connected = False
 
-        # Register callbacks
+        # Register the lifecycle callbacks expected by ucapi-framework.
+        # These methods are the integration points for setup, connect,
+        # and disconnect events; they are intentionally assigned here so
+        # the framework can invoke them when the driver starts and stops.
         self.driver.on_setup = self.on_setup
         self.driver.on_connect = self.on_connect
         self.driver.on_disconnect = self.on_disconnect
+
+        # Ensure the driver starts in a known clean state even before the
+        # framework has connected any devices or clients.
+        self.driver.set_available(True)
+
+    async def _shutdown_client(self) -> None:
+        """Close any existing client and clear the reference."""
+        if self.client:
+            await self.client.close()
+            self.client = None
 
     async def on_setup(self, setup_data: dict) -> DriverState:
         """Process user setup configuration from Remote 3 UI."""
@@ -47,8 +61,21 @@ class APR16Driver:
             _LOGGER.error("Setup failed: Host IP address is required")
             return DriverState.SETUP_ERROR
 
+        try:
+            port = int(port)
+        except (TypeError, ValueError):
+            _LOGGER.error("Setup failed: Port must be an integer, got %r", port)
+            return DriverState.SETUP_ERROR
+
+        await self._shutdown_client()
+
         self.client = APR16Client(host=host, port=port)
-        await self.client.start()
+        try:
+            await self.client.start()
+        except Exception as err:
+            _LOGGER.exception("Setup failed while connecting to APR16 at %s:%s: %s", host, port, err)
+            self.client = None
+            return DriverState.SETUP_ERROR
 
         # Instantiate entities
         mp = APR16MediaPlayerEntity(self.client)
@@ -84,16 +111,28 @@ class APR16Driver:
 
     async def on_connect(self) -> None:
         """Start background polling on successful connection."""
+        if self._connected:
+            return
+
         _LOGGER.info("Driver connected, starting background polling loop")
+        self._connected = True
         self._poll_task = asyncio.create_task(self._poll_loop())
 
     async def on_disconnect(self) -> None:
         """Clean up background tasks on disconnect."""
         _LOGGER.info("Driver disconnected")
+        self._connected = False
+
         if self._poll_task:
             self._poll_task.cancel()
-        if self.client:
-            await self.client.close()
+            try:
+                await self._poll_task
+            except asyncio.CancelledError:
+                pass
+            finally:
+                self._poll_task = None
+
+        await self._shutdown_client()
 
     async def _poll_loop(self) -> None:
         """Periodically refresh state for all registered entities."""
