@@ -34,7 +34,26 @@ _LOGGER = logging.getLogger(__name__)
 class APR16Driver(BaseIntegrationDriver):
     """Unfolded Circle integration driver for AudioControl Hyperion APR-16."""
     def __init__(self):
-        super().__init__()
+        super().__init__(
+            device_class=APR16Client,
+            entity_classes=[
+                APR16MediaPlayerEntity,
+                AudioModeSelectEntity,
+                TriggerVoltageSelectEntity,
+                TriggerOutputSwitchEntity,
+                HdmiOutputHpdSwitchEntity,
+                EdidGlobalSwitchEntity,
+                SystemRebootButtonEntity,
+                HdmiHandshakeResetButtonEntity,
+                AudioFormatSensorEntity,
+                AudioSampleRateSensorEntity,
+                AudioBitDepthSensorEntity,
+                VideoFormatSensorEntity,
+                SystemStatusSensorEntity,
+                FirmwareVersionSensorEntity,
+                HostIpSensorEntity,
+            ]
+        )
         self.client: APR16Client | None = None
         self._poll_task: asyncio.Task | None = None
         self._connected = False
