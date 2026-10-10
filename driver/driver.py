@@ -15,7 +15,6 @@ from ucapi import DeviceStates, StatusCodes
 
 from .client import APR16Client
 from .media_player import APR16MediaPlayerEntity
-from .number import MaxVolumeNumberEntity, PowerOnVolumeNumberEntity
 from .select import AudioModeSelectEntity, TriggerVoltageSelectEntity
 from .sensor import (
     AudioFormatSensorEntity,
@@ -58,20 +57,20 @@ class APR16Driver(BaseIntegrationDriver):
             await self.client.close()
             self.client = None
 
-    async def on_setup(self, setup_data: dict) -> DriverState:
+    async def on_setup(self, setup_data: dict):
         """Process user setup configuration from Remote 3 UI."""
         host = setup_data.get("host")
         port = setup_data.get("port", 80)
 
         if not host:
             _LOGGER.error("Setup failed: Host IP address is required")
-            return DriverState.SETUP_ERROR
+            return StatusCodes.SETUP_ERROR
 
         try:
             port = int(port)
         except (TypeError, ValueError):
             _LOGGER.error("Setup failed: Port must be an integer, got %r", port)
-            return DriverState.SETUP_ERROR
+            return StatusCodes.SETUP_ERROR
 
         await self._shutdown_client()
 
@@ -81,12 +80,10 @@ class APR16Driver(BaseIntegrationDriver):
         except Exception as err:
             _LOGGER.exception("Setup failed while connecting to APR16 at %s:%s: %s", host, port, err)
             self.client = None
-            return DriverState.SETUP_ERROR
+            return StatusCodes.SETUP_ERROR
 
         # Instantiate entities
         mp = APR16MediaPlayerEntity(self.client)
-        max_vol = MaxVolumeNumberEntity(self.client)
-        on_vol = PowerOnVolumeNumberEntity(self.client)
         audio_mode = AudioModeSelectEntity(self.client)
         trig_volt = TriggerVoltageSelectEntity(self.client)
         trig_switch = TriggerOutputSwitchEntity(self.client)
@@ -105,7 +102,7 @@ class APR16Driver(BaseIntegrationDriver):
 
         # Register entities with driver
         entities = [
-            mp, max_vol, on_vol, audio_mode, trig_volt, trig_switch,
+            mp, audio_mode, trig_volt, trig_switch,
             hpd_switch, edid_switch, reboot_btn, hpd_btn, fmt_sensor,
             rate_sensor, bit_sensor, vfmt_sensor, status_sensor,
             ver_sensor, ip_sensor
@@ -113,7 +110,7 @@ class APR16Driver(BaseIntegrationDriver):
         for entity in entities:
             self.driver.add_entity(entity)
 
-        return DriverState.CONNECTED
+        return StatusCodes.OK
 
     async def on_connect(self) -> None:
         """Start background polling on successful connection."""
