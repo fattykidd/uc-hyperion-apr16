@@ -130,11 +130,11 @@ async def main():
     logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s] %(name)s: %(message)s")
     _LOGGER.info("Starting AudioControl Hyperion APR-16 integration driver...")
     
+    # Instantiating the driver triggers the ucapi-framework server and mDNS advertisement
     driver_wrapper = APR16Driver()
     
-    # The ucapi-framework BaseIntegrationDriver usually provides an async run/start hook 
-    # or parses args to start the server loop.
-    await driver_wrapper.run()
+    # Block forever so the server and background tasks keep running
+    await asyncio.Event().wait()
 
 
 if __name__ == "__main__":
