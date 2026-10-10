@@ -13,4 +13,4 @@ COPY . .
 
 EXPOSE 9090
 
-CMD ["python3", "intg_hyperion_apr16/driver.py"]
+CMD ["python3", "run.py"]
