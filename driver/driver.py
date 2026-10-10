@@ -3,7 +3,7 @@
 import asyncio
 import logging
 import sys
-from ucapi.driver import Driver
+from ucapi_framework import Driver
 from ucapi.const import DriverState
 
 from .client import APR16Client
