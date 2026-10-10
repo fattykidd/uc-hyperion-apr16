@@ -123,22 +123,3 @@ class APR16Driver(BaseIntegrationDriver):
             except Exception as err:
                 _LOGGER.error("Error in background polling loop: %s", err)
             await asyncio.sleep(4)
-
-
-async def main():
-    """Run the integration driver."""
-    logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s] %(name)s: %(message)s")
-    _LOGGER.info("Starting AudioControl Hyperion APR-16 integration driver...")
-    
-    # Instantiating the driver triggers the ucapi-framework server and mDNS advertisement
-    driver_wrapper = APR16Driver()
-    
-    # Block forever so the server and background tasks keep running
-    await asyncio.Event().wait()
-
-
-if __name__ == "__main__":
-    try:
-        asyncio.run(main())
-    except KeyboardInterrupt:
-        _LOGGER.info("Driver stopped by user")
