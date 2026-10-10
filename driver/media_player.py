@@ -1,7 +1,16 @@
 """Media Player Entity implementation for AudioControl Hyperion APR-16."""
 
 import logging
-from ucapi.media_player import MediaPlayerEntity, MediaPlayerCommand, MediaPlayerFeature, MediaPlayerState
+
+# Entity base class from ucapi-framework
+from ucapi_framework import MediaPlayerEntity, MediaPlayerAttributes
+
+# Commands, features, and states from ucapi.media_player or ucapi
+from ucapi.media_player import (
+    Commands as MediaPlayerCommand,
+    Features as MediaPlayerFeature,
+    States as MediaPlayerState,
+)
 from .client import APR16Client
 
 _LOGGER = logging.getLogger(__name__)
